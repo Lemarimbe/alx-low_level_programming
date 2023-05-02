@@ -1,6 +1,6 @@
 /*
  * File: 2-strlen.c
- * 
+ *
  */
 
 #include "main.h"
