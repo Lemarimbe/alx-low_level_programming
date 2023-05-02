@@ -8,23 +8,16 @@
   */
 void rev_string(char *s)
 {
-	int i, c;
-	char *start, *end, tmp;
+	int len = 0, index = 0;
+	char tmp;
 
-	start = s;
-	end = s;
+	while (s[index++])
+		len++;
 
-	/* Move the end pointer to the end of the string */
-	while (*(end + 1) != '\0')
+	for (index = len - 1; index >= len / 2; index--)
 	{
-		end++;
-	}
-
-	/* Swap characters from start and end */
-	for (i = 0; i < (end - start + 1) / 2; i++)
-	{
-		tmp = *(start + i);
-		*(start + i) = *(end - i);
-		*(end - i) = tmp;
+		tmp = s[index];
+		s[index] = s[len - index - 1];
+		s[len - index - 1] = tmp;
 	}
 }
