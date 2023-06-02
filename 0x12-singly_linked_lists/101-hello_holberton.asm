@@ -1,15 +1,18 @@
 section .data
-    format db 'Hello, Holberton', 0
+    hello db 'Hello, Holberton', 0
 
 section .text
     global main
     extern printf
 
 main:
-    mov edi, format    ; load the address of the format string
-    xor eax, eax       ; clear eax register (format string is not needed)
-    call printf        ; call the printf function
+    sub rsp, 8        ; align stack pointer
 
-    xor eax, eax       ; exit with code 0
+    mov rdi, hello    ; load the address of the hello string
+    mov rax, 0        ; clear rax register (format string is not needed)
+    call printf       ; call the printf function
+
+    add rsp, 8        ; restore stack pointer
+    mov eax, 0        ; exit with code 0
     ret
 
