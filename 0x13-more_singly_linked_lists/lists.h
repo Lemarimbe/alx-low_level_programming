@@ -1,5 +1,5 @@
-#ifndef _S_LINK_LISTS_
-#define _S_LINK_LISTS_
+#ifndef LIST_H
+#define LIST_H
 
 #include <strings.h>
 #include <stdlib.h>
