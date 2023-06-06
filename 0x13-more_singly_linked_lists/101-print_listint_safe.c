@@ -9,7 +9,7 @@
 size_t print_listint_safe(const listint_t *h)
 {
 	size_t n_nodes = 0;
-	const listint_t *temp_h = NULL, *loop_node= NULL;
+	const listint_t *temp_h = NULL, *loop_node = NULL;
 
 	temp_h = h;
 	if (!h)
