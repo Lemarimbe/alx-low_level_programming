@@ -27,7 +27,7 @@ size_t print_listint_safe(const listint_t *head)
 			{
 				loop_node = temp_h;
 				printf("[%p] %d\n", (void *)temp_h, temp_h->n);
-				printf("loop node: [%p] %d\n", (void *)loop_node, loop_node->n);
+				printf("-> [%p] %d\n", (void *)loop_node, loop_node->n);
 				exit(98);
 			}
 		}
