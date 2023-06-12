@@ -1,3 +1,4 @@
+
 #include <elf.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,7 +17,6 @@ void print_osabi(unsigned char *e_ident);
 void print_type(unsigned int e_type, unsigned char *e_ident);
 void print_entry(unsigned long int e_entry, unsigned char *e_ident);
 void close_elf(int elf);
-void display_error(const char *message);
 
 /**
  * check_elf - Checks if a file is an ELF file.
@@ -261,16 +261,6 @@ void close_elf(int elf)
 }
 
 /**
- * display_error - Prints an error message to stderr and exits with code 98.
- * @message: The error message to display.
- */
-void display_error(const char *message)
-{
-    fprintf(stderr, "Error: %s\n", message);
-    exit(98);
-}
-
-/**
  * main - Displays the information contained in the
  *        ELF header at the start of an ELF file.
  * @argc: The number of arguments supplied to the program.
@@ -281,45 +271,45 @@ void display_error(const char *message)
  * Description: If the file is not an ELF File or
  *              the function fails - exit code 98.
  */
-
-int main(int argc, char *argv[])
+int main(int __attribute__((__unused__)) argc, char *argv[])
 {
-    if (argc != 2)
-    {
-        display_error("Usage: elf_header elf_filename");
-    }
+	Elf64_Ehdr *header;
+	int o, r;
 
-    int fd = open(argv[1], O_RDONLY);
-    if (fd == -1)
-    {
-        display_error("Failed to open the file");
-    }
+	o = open(argv[1], O_RDONLY);
+	if (o == -1)
+	{
+		dprintf(STDERR_FILENO, "Error: Can't read file %s\n", argv[1]);
+		exit(98);
+	}
+	header = malloc(sizeof(Elf64_Ehdr));
+	if (header == NULL)
+	{
+		close_elf(o);
+		dprintf(STDERR_FILENO, "Error: Can't read file %s\n", argv[1]);
+		exit(98);
+	}
+	r = read(o, header, sizeof(Elf64_Ehdr));
+	if (r == -1)
+	{
+		free(header);
+		close_elf(o);
+		dprintf(STDERR_FILENO, "Error: `%s`: No such file\n", argv[1]);
+		exit(98);
+	}
 
-    Elf64_Ehdr header;
-    ssize_t num_read = read(fd, &header, sizeof(Elf64_Ehdr));
-    if (num_read == -1)
-    {
-        close_elf(fd);
-        display_error("Failed to read the file");
-    }
-    else if (num_read != sizeof(Elf64_Ehdr))
-    {
-        close_elf(fd);
-        display_error("Incomplete ELF header");
-    }
+	check_elf(header->e_ident);
+	printf("ELF Header:\n");
+	print_magic(header->e_ident);
+	print_class(header->e_ident);
+	print_data(header->e_ident);
+	print_version(header->e_ident);
+	print_osabi(header->e_ident);
+	print_abi(header->e_ident);
+	print_type(header->e_type, header->e_ident);
+	print_entry(header->e_entry, header->e_ident);
 
-    check_elf(header.e_ident);
-    printf("ELF Header:\n");
-    print_magic(header.e_ident);
-    print_class(header.e_ident);
-    print_data(header.e_ident);
-    print_version(header.e_ident);
-    print_osabi(header.e_ident);
-    print_abi(header.e_ident);
-    print_type(header.e_type, header.e_ident);
-    print_entry(header.e_entry, header.e_ident);
-
-    close_elf(fd);
-    return 0;
+	free(header);
+	close_elf(o);
+	return (0);
 }
-
