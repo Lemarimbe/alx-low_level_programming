@@ -1,15 +1,17 @@
 #include "main.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 char *create_buffer(char *file);
-void close_file_descriptor(int fd);
+void close_file(int fd);
 
 /**
  * create_buffer - Allocates 1024 bytes for a buffer.
- * @file_name: The name of the file buffer is storing chars for.
+ * @file: The name of the file buffer is storing chars for.
  *
  * Return: A pointer to the newly-allocated buffer.
  */
-char *create_buffer(char *file_name)
+char *create_buffer(char *file)
 {
 	char *buffer;
 
@@ -18,7 +20,7 @@ char *create_buffer(char *file_name)
 	if (buffer == NULL)
 	{
 		dprintf(STDERR_FILENO,
-			"Error: Can't write to %s\n", file_name);
+			"Error: Can't write to %s\n", file);
 		exit(99);
 	}
 
@@ -26,16 +28,16 @@ char *create_buffer(char *file_name)
 }
 
 /**
- * close_file_descriptor - Closes file descriptors.
+ * close_file - Closes file descriptors.
  * @fd: The file descriptor to be closed.
  */
-void close_file_descriptor(int fd)
+void close_file(int fd)
 {
-	int close_result;
+	int c;
 
-	close_result = close(fd);
+	c = close(fd);
 
-	if (close_result == -1)
+	if (c == -1)
 	{
 		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
 		exit(100);
@@ -56,7 +58,7 @@ void close_file_descriptor(int fd)
  */
 int main(int argc, char *argv[])
 {
-	int source_fd, dest_fd, read_bytes, write_bytes;
+	int from, to, r, w;
 	char *buffer;
 
 	if (argc != 3)
@@ -66,12 +68,12 @@ int main(int argc, char *argv[])
 	}
 
 	buffer = create_buffer(argv[2]);
-	source_fd = open(argv[1], O_RDONLY);
-	read_bytes = read(source_fd, buffer, 1024);
-	dest_fd = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+	from = open(argv[1], O_RDONLY);
+	r = read(from, buffer, 1024);
+	to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
 
 	do {
-		if (source_fd == -1 || read_bytes == -1)
+		if (from == -1 || r == -1)
 		{
 			dprintf(STDERR_FILENO,
 				"Error: Can't read from file %s\n", argv[1]);
@@ -79,8 +81,8 @@ int main(int argc, char *argv[])
 			exit(98);
 		}
 
-		write_bytes = write(dest_fd, buffer, read_bytes);
-		if (dest_fd == -1 || write_bytes == -1)
+		w = write(to, buffer, r);
+		if (to == -1 || w == -1)
 		{
 			dprintf(STDERR_FILENO,
 				"Error: Can't write to %s\n", argv[2]);
@@ -88,15 +90,14 @@ int main(int argc, char *argv[])
 			exit(99);
 		}
 
-		read_bytes = read(source_fd, buffer, 1024);
-		dest_fd = open(argv[2], O_WRONLY | O_APPEND);
+		r = read(from, buffer, 1024);
+		to = open(argv[2], O_WRONLY | O_APPEND);
 
-	} while (read_bytes > 0);
+	} while (r > 0);
 
 	free(buffer);
-	close_file_descriptor(source_fd);
-	close_file_descriptor(dest_fd);
+	close_file(from);
+	close_file(to);
 
 	return (0);
 }
-
